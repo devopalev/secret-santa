@@ -29,7 +29,6 @@ services:
     networks:
       - secret-santa-network
 
-
 volumes:
   postgres_secret_santa_data:
 
