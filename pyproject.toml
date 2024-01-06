@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "secret-santa"
+version = "0.1.0"
+description = "Игра Тайный Санта"
+authors = ["devopalev <maksim@devopalev.ru>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+python-telegram-bot = "^20.7"
+psycopg2-binary = "^2.9.9"
+asyncpg = "^0.29.0"
+yoyo-migrations = "^8.2.0"
+python-dotenv = "^1.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:latest
+    env_file:
+      - .env
+    volumes:
+      - postgres_secret_santa_data:/var/lib/postgresql/data/
+    networks:
+      - secret-santa-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  bot:
+    build: .
+    restart: always
+    environment:
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - secret-santa-network
+
+
+volumes:
+  postgres_secret_santa_data:
+
+networks:
+  secret-santa-network:
+    name: secret-santa-network
