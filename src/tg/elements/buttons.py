@@ -23,11 +23,11 @@ class CallbackGame(BaseCallbackConstructor):
 
 
 class ViewGameButton(InlineKeyboardButton):
-    def __init__(self, game: GameSanta, telegram_id: int = None, prev_emoji: bool = False):
+    def __init__(self, game: GameSanta, user_id: int = None, prev_emoji: bool = False):
         text_btn = game.title
-        if telegram_id:
-            text_btn = ("\U0001F511 " if game.initiator_id == telegram_id else "") + text_btn
-            text_btn = ("\U0001F385 " if game.check_member(telegram_id) else "") + text_btn
+        if user_id:
+            text_btn = ("\U0001F511 " if game.initiator_id == user_id else "") + text_btn
+            text_btn = ("\U0001F385 " if game.check_member(user_id) else "") + text_btn
         if prev_emoji:
             text_btn = "\U000021A9 " + text_btn
         super().__init__(text_btn, callback_data=str(CallbackGame(CallbackData.VIEW_GAME, game.uuid)))

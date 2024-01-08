@@ -15,8 +15,8 @@ from src.tg.handlers.common import CreateGameStates
 
 async def request_title(update: Update, context: CustomContext) -> CreateGameStates.TITLE:
     context.game = GameSanta.build_from_user(user=update.effective_user)
-    text = messages.RequestTitleGame()
-    await update.message.reply_text(text)
+    msg = messages.RequestTitleGameMessage()
+    await update.message.reply_text(msg.text)
     return CreateGameStates.TITLE
 
 
@@ -26,8 +26,8 @@ async def change_title(update: Update, context: CustomContext):
 
 
 async def request_description(update: Update, context: CustomContext) -> CreateGameStates.DESCRIPTION:
-    text = messages.RequestDescriptionGame()
-    await update.effective_chat.send_message(text)
+    msg = messages.RequestDescriptionGameMessage()
+    await update.effective_chat.send_message(msg.text)
     return CreateGameStates.DESCRIPTION
 
 
@@ -38,8 +38,8 @@ async def change_description(update: Update, context: CustomContext):
 
 async def request_date(update: Update, context: CustomContext):
     cal = TgCalendarKeyboard(locale=Locale.ru)
-    text = messages.RequestDateGame()
-    await update.effective_chat.send_message(text, reply_markup=cal.keyboard)
+    msg = messages.RequestDateGameMessage()
+    await update.effective_chat.send_message(msg.text, reply_markup=cal.keyboard)
     return CreateGameStates.CALENDAR
 
 
@@ -53,7 +53,7 @@ async def handle_calendar(update: Update, context: CustomContext):
             await context.db_storage.save(context.game)
 
             await view_game(update, context, game=context.game)
-            event = messages.DateGameChanged(context.game.title, context.game.date_finish)
+            event = messages.DateGameChangedMessage(context.game.title, context.game.date_finish)
             context.send_event(event, context.game.players)
             del context.game
             return ConversationHandler.END

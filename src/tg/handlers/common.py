@@ -20,8 +20,8 @@ class CreateGameStates(Enum):
 
 async def help_command(update: Update, *args) -> None:
     """Send a message when the command /help is issued."""
-    text = messages.HelpText()
-    await update.message.reply_text(text, text.parse_mode)
+    msg = messages.HelpMessage()
+    await update.message.reply_text(msg.text, msg.parse_mode)
 
 
 async def error_handler(update: Update, context: CustomContext):
@@ -41,8 +41,8 @@ async def timeout_handle(update: Update, context: CustomContext):
 
 async def unknown_callback(update: Update, *args):
     await update.callback_query.message.edit_reply_markup()
-    text = messages.BadCallbackText()
-    await update.callback_query.message.reply_text(text, text.parse_mode)
+    msg = messages.BadCallbackMessage()
+    await update.callback_query.message.reply_text(msg.text, msg.parse_mode)
     return ConversationHandler.END
 
 

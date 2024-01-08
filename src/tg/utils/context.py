@@ -6,7 +6,7 @@ from telegram.ext import CallbackContext, ExtBot
 
 from src.domain.model import GameSanta, Player
 from src.repository import AbstractRepository, Repository, RepositoryMemory
-from src.tg.elements.base import BaseText
+from src.tg.elements.base import BaseMessage
 
 KEY_STORAGE = "game"
 
@@ -34,7 +34,7 @@ class CustomContext(CallbackContext[ExtBot, dict, dict, dict]):
     def game_id(self):
         return self.match.group(1)
 
-    def send_event(self, event: BaseText, players: list[Player]):
+    def send_event(self, event: BaseMessage, players: list[Player]):
         async def async_send_event(user_id: int, text: str, parse_mode: ParseMode):
             try:
                 await self.bot.send_message(user_id, text, parse_mode)
@@ -42,7 +42,7 @@ class CustomContext(CallbackContext[ExtBot, dict, dict, dict]):
                 logger.warning(f"Не удалось отправить сообщение ({text}) пользователю {user_id}: {err}", exc_info=True)
 
         for player in players:
-            asyncio.create_task(async_send_event(player.telegram_id, event, event.parse_mode))
+            asyncio.create_task(async_send_event(player.telegram_id, event.text, event.parse_mode))
 
 
 class MemoryCustomContext(CustomContext):

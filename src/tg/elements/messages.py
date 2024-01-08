@@ -3,51 +3,49 @@ from datetime import date
 
 from telegram.helpers import escape_markdown, mention_markdown
 
-from src.domain.model import GameSanta
+from src.domain.model import GameSanta, Player
 from src.domain.model import GameState
-from src.tg.elements.base import BaseText
-
+from src.tg.elements import keyboards
+from src.tg.elements.base import BaseMessage
 
 escape_markdown_2 = partial(escape_markdown, version=2)
 
 
-class StartText(BaseText):
-    def __new__(cls, fullname: str):
-        return super().__new__(cls, f"Привет, {fullname}!\nИспользуй /help для вызова справки")
+class StartMessage(BaseMessage):
+    def __init__(self, fullname: str):
+        self.text = f"Привет, {fullname}!\nИспользуй /help для вызова справки"
 
 
-class GameNotFoundText(BaseText):
-    def __new__(cls, many: bool = False):
+class GameNotFoundMessage(BaseMessage):
+    def __init__(self, many: bool = False):
         if many:
-            return super().__new__(cls, "Упс, игры не найдены")
+            self.text = "Упс, игры не найдены"
         else:
-            return super().__new__(cls, "Упс, не нашел игру")
+            self.text = "Упс, не нашел игру"
 
 
-class BadLinkToGameText(BaseText):
-    def __new__(cls):
-        return super().__new__(cls, "Некорректная ссылка, игра не найдена")
+class BadLinkToGameMessage(BaseMessage):
+    def __init__(self):
+        self.text = "Некорректная ссылка, игра не найдена"
 
 
-class RegistrationClosedText(BaseText):
-    def __new__(cls):
-        return super().__new__(cls, "Регистрация в игре уже закрыта, обратитесь к создателю игры")
+class RegistrationClosedMessage(BaseMessage):
+    def __init__(self):
+        self.text = "Регистрация в игре уже закрыта, обратитесь к создателю игры"
 
 
-class JoinedGameText(BaseText):
-    def __new__(cls, title: str):
-        text = escape_markdown(f"Вы присоединились к игре {title}")
-        return super().__new__(cls, text)
+class JoinedGameMessage(BaseMessage):
+    def __init__(self, title: str):
+        self.text = escape_markdown(f"Вы присоединились к игре {title}")
 
 
-class AlreadyJoinedGameText(BaseText):
-    def __new__(cls, title: str):
-        text = escape_markdown(f"Вы уже присоединились к игре {title}")
-        return super().__new__(cls, text)
+class AlreadyJoinedGameMessage(BaseMessage):
+    def __init__(self, title: str):
+        self.text = escape_markdown(f"Вы уже присоединились к игре {title}")
 
 
-class ViewGameText(BaseText):
-    def __new__(cls, game: GameSanta, bot_link: str, user_id: int):
+class ViewGameMessage(BaseMessage):
+    def __init__(self, game: GameSanta, bot_link: str, user_id: int):
         template = ("*{title}*\n"
                     "_{description}_\n\n"
                     "{recipient_gift}"
@@ -82,76 +80,77 @@ class ViewGameText(BaseText):
         link = escape_markdown_2(f"{bot_link}?start={game.uuid}")
         quantity = str(len(game.players))
 
-        text = template.format(title=title, description=description, recipient_gift=recipient_gift, status=status,
-                               date=date, initiator=initiator, link=link, quantity=quantity)
-        return super().__new__(cls, text)
+        self.text = template.format(title=title, description=description, recipient_gift=recipient_gift, status=status,
+                                    date=date, initiator=initiator, link=link, quantity=quantity)
+        self.reply_markup = keyboards.ViewGameKeyboard(game, user_id)
 
 
-class MyGamesText(BaseText):
-    def __new__(cls):
-        return super().__new__(cls, "Ваши игры\n\U0001F511 - вы владелец\n\U0001F385 - вы участник")
+class MyGamesMessage(BaseMessage):
+    def __init__(self, games: list[GameSanta], user_id: int):
+        self.text = "Ваши игры\n\U0001F511 - вы владелец\n\U0001F385 - вы участник"
+        self.reply_markup = keyboards.MyGamesKeyboard(games, user_id)
 
 
-class RequestDescriptionGame(BaseText):
-    def __new__(cls):
-        text = ("Напиши понятное твоей команде описание игры, можешь указать место встречи "
-                "и любую дополнительную информацию")
-        return super().__new__(cls, text)
+class RequestDescriptionGameMessage(BaseMessage):
+    def __init__(self, game: GameSanta = None):
+        self.text = ("Напиши понятное твоей команде описание игры, можешь указать место встречи "
+                     "и любую дополнительную информацию")
+        self._game = game
+
+    @property
+    def reply_markup(self):
+        assert self._game
+        return keyboards.PrevViewGame(self._game)
 
 
-class RequestDateGame(BaseText):
-    def __new__(cls):
-        text = "Выбери дату вручения подарков, а я напомню всем участникам заранее"
-        return super().__new__(cls, text)
+class RequestDateGameMessage(BaseMessage):
+    def __init__(self):
+        self.text = "Выбери дату вручения подарков, а я напомню всем участникам заранее"
 
 
-class RequestTitleGame(BaseText):
-    def __new__(cls):
-        text = "Самое время создать новую игру \U0001F642\nНапиши название игры"
-        return super().__new__(cls, text)
+class RequestTitleGameMessage(BaseMessage):
+    def __init__(self):
+        self.text = "Самое время создать новую игру \U0001F642\nНапиши название игры"
 
 
-class DeleteGameInitiator(BaseText):
-    def __new__(cls, title: str):
+class DeleteGameInitiatorMessage(BaseMessage):
+    def __init__(self, title: str):
         title = escape_markdown_2(title)
-        text = f"Игра {title} удалена! Уведомления участникам отправлены"
-        return super().__new__(cls, text)
+        self.text = f"Игра {title} удалена! Уведомления участникам отправлены"
 
 
-class DeleteGamePlayer(BaseText):
-    def __new__(cls, title: str, user_id: int, fullname: str):
+class DeleteGamePlayerMessage(BaseMessage):
+    def __init__(self, title: str, user_id: int, fullname: str):
         initiator = mention_markdown(user_id, fullname, 2)
         title = escape_markdown_2(title)
-        text = f"Игра {title} удалена инициатором {initiator}"
-        return super().__new__(cls, text)
+        self.text = f"Игра {title} удалена инициатором {initiator}"
 
 
-class DateGameChanged(BaseText):
-    def __new__(cls, title: str, new_date: date):
+class DateGameChangedMessage(BaseMessage):
+    def __init__(self, title: str, new_date: date):
         title = escape_markdown_2(title)
         new_date = escape_markdown_2(str(new_date))
-        text = f"Дата в игре {title} изменилась на {new_date}"
-        return super().__new__(cls, text)
+        self.text = f"Дата в игре {title} изменилась на {new_date}"
 
 
-class DescriptionGameChanged(BaseText):
-    def __new__(cls, title: str, new_description: str):
+class DescriptionGameChangedMessage(BaseMessage):
+    def __init__(self, title: str, new_description: str):
         title = escape_markdown_2(title)
         new_description = escape_markdown_2(new_description)
-        text = f"Описание в игре {title} изменилось на _{new_description}_"
-        return super().__new__(cls, text)
+        self.text = f"Описание в игре {title} изменилось на _{new_description}_"
 
 
-class EventShufflePlayersGame(BaseText):
-    def __new__(cls, title: str, user_id: int, fullname: str):
+class EventShufflePlayersGameMessage(BaseMessage):
+    def __init__(self, title: str, player: Player):
         title = escape_markdown_2(title)
-        recipient = mention_markdown(user_id, fullname, 2)
-        text = f"В игре {title} распределены Тайные Санты\\. Вы дарите подарок пользователю {recipient}"
-        return super().__new__(cls, text)
+        recipient = mention_markdown(player.recipient.telegram_id, player.recipient.fullname, 2)
+        rec_username = "@" + player.recipient.username if player.recipient.username else ""
+        self.text = (f"В игре {title} распределены Тайные Санты\\. "
+                     f"Вы дарите подарок пользователю {recipient} ") + rec_username
 
 
-class HelpText(BaseText):
-    def __new__(cls):
+class HelpMessage(BaseMessage):
+    def __init__(self):
         text = (f"Игра Тайный Санта - это анонимный обмен подарками в группе играющих людей\n"
                 f"/create_game - создать новую игру\n"
                 f"/my_games - показать все игры которые вы создали и/или в которых участвуете\n\n"
@@ -159,9 +158,9 @@ class HelpText(BaseText):
                 f"\U000026A0 Выгрузить список игроков может создатель который НЕ участвует в игре\n"
                 f"\U000026A0 Распределить Сант можно только если игроков больше одного\n"
                 f"\U000026D4 Нельзя: менять название, распределять Тайных Сант повторно")
-        return super().__new__(cls, escape_markdown_2(text))
+        self.text = escape_markdown_2(text)
 
 
-class BadCallbackText(BaseText):
-    def __new__(cls):
-        return super().__new__(cls, "Не удалось распознать кнопку\\, возможно она устарела")
+class BadCallbackMessage(BaseMessage):
+    def __init__(self):
+        self.text = "Не удалось распознать кнопку\\, возможно она устарела"
