@@ -7,26 +7,23 @@ from src.core.exception import EnvNotFoundError
 dotenv.load_dotenv()
 
 
-def _get_env(name: str, default_=None, required: bool = False):
-    var = os.environ.get(name) or default_
-    if required and not var:
-        raise EnvNotFoundError(name)
-    return var
+try:
+    BOT_TOKEN = os.environ["BOT_TOKEN"]
 
+    POSTGRES_USER = os.environ["POSTGRES_USER"]
+    POSTGRES_PASSWORD = os.environ["POSTGRES_PASSWORD"]
+    POSTGRES_DB = os.environ["POSTGRES_DB"]
+    POSTGRES_HOST = os.environ["POSTGRES_HOST"]
+    POSTGRES_PORT = os.environ["POSTGRES_PORT"]
 
-BOT_TOKEN = _get_env("BOT_TOKEN")
+    LIMIT_TITLE_GAME = os.environ.get("LIMIT_TITLE_GAME", 40)  # symbols
+    LIMIT_DESCRIPTION_GAME = os.environ.get("LIMIT_DESCRIPTION_GAME", 100)  # symbols
+    LIMIT_CACHE_STORAGE = os.environ.get("LIMIT_CACHE_STORAGE", 60)  # seconds
+    LIMIT_STORAGE_GAME = os.environ.get("LIMIT_CACHE_STORAGE", 100)  # quantity game in storage
 
-LIMIT_TITLE_GAME = _get_env("LIMIT_TITLE_GAME", 40)  # symbols
-LIMIT_DESCRIPTION_GAME = _get_env("LIMIT_DESCRIPTION_GAME", 100)  # symbols
-LIMIT_CACHE_STORAGE = _get_env("LIMIT_CACHE_STORAGE", 60)  # seconds
-LIMIT_STORAGE_GAME = _get_env("LIMIT_CACHE_STORAGE", 100)  # quantity game in storage
+    POSTGRES_DSN = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
+    APP_MIGRATIONS_PATH = os.path.abspath("migrations")
 
-POSTGRES_USER = _get_env("POSTGRES_USER", required=True)
-POSTGRES_PASSWORD = _get_env("POSTGRES_PASSWORD", required=True)
-POSTGRES_DB = _get_env("POSTGRES_DB", required=True)
-POSTGRES_HOST = _get_env("POSTGRES_HOST", required=True)
-POSTGRES_PORT = _get_env("POSTGRES_PORT", required=True)
-POSTGRES_DSN = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
-APP_MIGRATIONS_PATH = os.path.abspath("migrations")
-
-CSV_SPLITTER = _get_env("CSV_SPLITTER", ";")
+    CSV_SPLITTER = os.environ.get("CSV_SPLITTER", ";")
+except KeyError as err:
+    raise EnvNotFoundError(err.args[0]) from err
