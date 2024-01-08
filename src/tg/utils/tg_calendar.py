@@ -113,8 +113,6 @@ class ButtonFactory:
 
 class TgCalendarKeyboard:
     def __init__(self,
-                 year: int = None,
-                 month: int = None,
                  min_date: date = None,
                  max_date: date = None,
                  locale: Locale = Locale.ru):
@@ -128,8 +126,6 @@ class TgCalendarKeyboard:
 
         target = self.min_date + timedelta(days=1)
         self._selected_month = MonthDate(target.year, target.month)
-        # self._year = year or target.year
-        # self._month = month or target.month  # сделать дескриптор
 
     @property
     def selected_date(self) -> date:
@@ -185,7 +181,6 @@ class TgCalendarKeyboard:
 
         match cb.action:
             case Action.CHANGE_MONTH:
-                # self._year, self._month = cb.data
                 self._selected_month = MonthDate(*map(int, cb.data))
             case Action.SELECT:
                 self._selected_date = date(*map(int, cb.data))
