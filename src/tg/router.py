@@ -1,3 +1,5 @@
+import warnings
+
 from telegram import BotCommand
 from telegram.ext import (ConversationHandler,
                           BaseHandler,
@@ -6,9 +8,10 @@ from telegram.ext import (ConversationHandler,
                           CallbackQueryHandler,
                           CommandHandler,
                           Application)
+from telegram.warnings import PTBUserWarning
 
-from src.tg.elements import CallbackData
-from src.tg.elements import CommandData
+from src.tg.elements.data import CallbackData
+from src.tg.elements.data import CommandData
 from src.tg.handlers.common import timeout_handle, ignore_callback
 from src.tg.handlers.common import help_command
 from src.tg.handlers.common import unknown_callback
@@ -24,10 +27,14 @@ def build_handlers() -> list[BaseHandler]:
     timeout_handlers = [CallbackQueryHandler(timeout_handle), MessageHandler(filters.ALL, timeout_handle)]
     calendar_handler = CallbackQueryHandler(handle_calendar, CallbackBuilder.base_cb)
     proxy_view_game = CallbackQueryHandler(admin_santa.proxy_view_game, pattern=CallbackData.VIEW_GAME.regex)
-    handlers = [
-        CommandHandler(CommandData.START, admin_santa.start),
-        CommandHandler(CommandData.HELP, help_command),
-        ConversationHandler(
+
+    with warnings.catch_warnings():
+        # PTBUserWarning: If 'per_message=False', 'CallbackQueryHandler' will not be tracked for every message.
+        # Read this FAQ entry to learn more about the per_* settings:
+        # https://github.com/python-telegram-bot/python-telegram-bot/wiki/Frequently-Asked-Questions#what-do-the-per_-settings-in-conversationhandler-do.
+        warnings.simplefilter("ignore", PTBUserWarning)
+
+        create_game_handler = ConversationHandler(
             entry_points=[CommandHandler(CommandData.CREATE_GAME, request_title)],
             states={
                 CreateGameStates.TITLE: [MessageHandler(filters.TEXT, change_title)],
@@ -36,9 +43,11 @@ def build_handlers() -> list[BaseHandler]:
                 ConversationHandler.TIMEOUT: timeout_handlers
             },
             fallbacks=unknown_handlers,
-            conversation_timeout=300
-        ),
-        ConversationHandler(
+            conversation_timeout=300,
+            per_message=False
+        )
+
+        request_description_handler = ConversationHandler(
             entry_points=[CallbackQueryHandler(admin_santa.request_description,
                                                pattern=CallbackData.CHANGE_DESCRIPTION.regex)],
             states={
@@ -46,15 +55,23 @@ def build_handlers() -> list[BaseHandler]:
                 ConversationHandler.TIMEOUT: timeout_handlers
             },
             fallbacks=[proxy_view_game, *unknown_handlers],
-            conversation_timeout=300
-        ),
+            conversation_timeout=300,
+            per_message=False
+        )
+
+    handlers = [
+        CommandHandler(CommandData.START, admin_santa.start),
+        CommandHandler(CommandData.HELP, help_command),
+        create_game_handler,
+        request_description_handler,
         ConversationHandler(
             entry_points=[CallbackQueryHandler(admin_santa.request_date, CallbackData.CHANGE_DATE.regex)],
             states={
                 CreateGameStates.CALENDAR: [calendar_handler]
             },
             fallbacks=[proxy_view_game, *unknown_handlers],
-            conversation_timeout=300
+            conversation_timeout=300,
+            per_message=True
         ),
         CommandHandler(CommandData.MY_GAMES, callback=admin_santa.my_games),
         CallbackQueryHandler(admin_santa.my_games, pattern=CallbackData.MY_GAMES.regex),

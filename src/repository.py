@@ -146,7 +146,7 @@ class RepositoryMemory(AbstractRepository):
 
     async def save(self, game: GameSanta) -> GameSanta:
         if not game.uuid:
-            game.uuid = uuid.uuid4()
+            game.uuid = str(uuid.uuid4())
         self.storage[game.uuid] = game
 
     async def delete(self, game: GameSanta):

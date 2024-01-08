@@ -21,6 +21,34 @@ test = ["anyio[trio]", "coverage[toml] (>=7)", "exceptiongroup (>=1.2.0)", "hypo
 trio = ["trio (>=0.23)"]
 
 [[package]]
+name = "apscheduler"
+version = "3.10.4"
+description = "In-process task scheduler with Cron-like capabilities"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "APScheduler-3.10.4-py3-none-any.whl", hash = "sha256:fb91e8a768632a4756a585f79ec834e0e27aad5860bac7eaa523d9ccefd87661"},
+    {file = "APScheduler-3.10.4.tar.gz", hash = "sha256:e6df071b27d9be898e486bc7940a7be50b4af2e9da7c08f0744a96d4bd4cef4a"},
+]
+
+[package.dependencies]
+pytz = "*"
+six = ">=1.4.0"
+tzlocal = ">=2.0,<3.dev0 || >=4.dev0"
+
+[package.extras]
+doc = ["sphinx", "sphinx-rtd-theme"]
+gevent = ["gevent"]
+mongodb = ["pymongo (>=3.0)"]
+redis = ["redis (>=3.0)"]
+rethinkdb = ["rethinkdb (>=2.4.0)"]
+sqlalchemy = ["sqlalchemy (>=1.4)"]
+testing = ["pytest", "pytest-asyncio", "pytest-cov", "pytest-tornado5"]
+tornado = ["tornado (>=4.3)"]
+twisted = ["twisted"]
+zookeeper = ["kazoo"]
+
+[[package]]
 name = "async-timeout"
 version = "4.0.3"
 description = "Timeout context manager for asyncio programs"
@@ -292,7 +320,9 @@ files = [
 ]
 
 [package.dependencies]
+APScheduler = {version = ">=3.10.4,<3.11.0", optional = true, markers = "extra == \"job-queue\""}
 httpx = ">=0.25.2,<0.26.0"
+pytz = {version = ">=2018.6", optional = true, markers = "extra == \"job-queue\""}
 
 [package.extras]
 all = ["APScheduler (>=3.10.4,<3.11.0)", "aiolimiter (>=1.1.0,<1.2.0)", "cachetools (>=5.3.2,<5.4.0)", "cryptography (>=39.0.1)", "httpx[http2]", "httpx[socks]", "pytz (>=2018.6)", "tornado (>=6.3.3,<6.4.0)"]
@@ -304,6 +334,28 @@ passport = ["cryptography (>=39.0.1)"]
 rate-limiter = ["aiolimiter (>=1.1.0,<1.2.0)"]
 socks = ["httpx[socks]"]
 webhooks = ["tornado (>=6.3.3,<6.4.0)"]
+
+[[package]]
+name = "pytz"
+version = "2023.3.post1"
+description = "World timezone definitions, modern and historical"
+optional = false
+python-versions = "*"
+files = [
+    {file = "pytz-2023.3.post1-py2.py3-none-any.whl", hash = "sha256:ce42d816b81b68506614c11e8937d3aa9e41007ceb50bfdcb0749b921bf646c7"},
+    {file = "pytz-2023.3.post1.tar.gz", hash = "sha256:7b4fddbeb94a1eba4b557da24f19fdf9db575192544270a9101d8509f9f43d7b"},
+]
+
+[[package]]
+name = "six"
+version = "1.16.0"
+description = "Python 2 and 3 compatibility utilities"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*"
+files = [
+    {file = "six-1.16.0-py2.py3-none-any.whl", hash = "sha256:8abb2f1d86890a2dfb989f9a77cfcfd3e47c2a354b01111771326f8aa26e0254"},
+    {file = "six-1.16.0.tar.gz", hash = "sha256:1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926"},
+]
 
 [[package]]
 name = "sniffio"
@@ -347,6 +399,34 @@ files = [
 widechars = ["wcwidth"]
 
 [[package]]
+name = "tzdata"
+version = "2023.4"
+description = "Provider of IANA time zone data"
+optional = false
+python-versions = ">=2"
+files = [
+    {file = "tzdata-2023.4-py2.py3-none-any.whl", hash = "sha256:aa3ace4329eeacda5b7beb7ea08ece826c28d761cda36e747cfbf97996d39bf3"},
+    {file = "tzdata-2023.4.tar.gz", hash = "sha256:dd54c94f294765522c77399649b4fefd95522479a664a0cec87f41bebc6148c9"},
+]
+
+[[package]]
+name = "tzlocal"
+version = "5.2"
+description = "tzinfo object for the local timezone"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "tzlocal-5.2-py3-none-any.whl", hash = "sha256:49816ef2fe65ea8ac19d19aa7a1ae0551c834303d5014c6d5a62e4cbda8047b8"},
+    {file = "tzlocal-5.2.tar.gz", hash = "sha256:8d399205578f1a9342816409cc1e46a93ebd5755e39ea2d85334bea911bf0e6e"},
+]
+
+[package.dependencies]
+tzdata = {version = "*", markers = "platform_system == \"Windows\""}
+
+[package.extras]
+devenv = ["check-manifest", "pytest (>=4.3)", "pytest-cov", "pytest-mock (>=3.3)", "zest.releaser"]
+
+[[package]]
 name = "yoyo-migrations"
 version = "8.2.0"
 description = "Database migrations with SQL"
@@ -385,4 +465,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "0a6f81f9452abb3e971d429a0d5488d4a152006957db9d90d72cd830c0cb593e"
+content-hash = "c3f874df2d8a353a865b012e277512b2143cd6dd2d9cf5fa8bbbdf8e75c4bbc3"
