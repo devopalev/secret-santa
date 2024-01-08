@@ -19,10 +19,6 @@ class BaseCallbackConstructor(ABC):
         return self.callback_data
 
 
-class BaseText(str, ABC):
-    parse_mode = ParseMode.MARKDOWN_V2
-
-
 class BaseMessage(ABC):
     text: str
     parse_mode: str = ParseMode.MARKDOWN_V2
